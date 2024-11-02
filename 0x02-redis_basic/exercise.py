@@ -8,6 +8,9 @@ from functools import wraps
 
 
 def replay(method: Callable):
+    '''
+     display the history of calls of a particular function
+     '''
     method_name = method.__qualname__
     count = method.__self__._redis.llen(f"{method_name}:inputs")
     print(f"{method_name} was called {count} times:")
