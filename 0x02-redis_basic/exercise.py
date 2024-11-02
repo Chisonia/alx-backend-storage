@@ -7,24 +7,17 @@ from typing import Any, Union, Callable, Optional
 from functools import wraps
 
 
-def replay(method: Callable) -> None:
-    '''
-    Displays the history of calls
-    for a specific Cache method.'''
-    cache = method.__self__
+def replay(method: Callable):
     method_name = method.__qualname__
+    count = method.__self__._redis.llen(f"{method_name}:inputs")
+    print(f"{method_name} was called {count} times:")
 
-    # Retrieve call count from Redis
-    call_count = int(cache._redis.get(method_name) or 0)
-    print(f"{method_name} was called {call_count} times:")
+    inputs = method.__self__._redis.lrange(f"{method_name}:inputs", 0, -1)
+    outputs = method.__self__._redis.lrange(f"{method_name}:outputs", 0, -1)
 
-    # Retrieve inputs and outputs from Redis
-    inputs = cache._redis.lrange(f"{method_name}:inputs", 0, -1)
-    outputs = cache._redis.lrange(f"{method_name}:outputs", 0, -1)
-
-    # Loop through each input and output pair and display
     for input_val, output_val in zip(inputs, outputs):
-        print(f"{method_name}(*{input_val!r}) -> {output_val!r}")
+        # Decode input and format it correctly
+        print(f"{method_name}(*{eval(input_val.decode('utf-8'))}) -> {output_val.decode('utf-8')}")  # noqa: E501
 
 
 def call_history(method: Callable) -> Callable:
