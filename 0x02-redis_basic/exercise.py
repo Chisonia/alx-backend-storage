@@ -81,7 +81,7 @@ class Cache:
         self._redis.set(key, data)
         return key
 
-    def get(self, key: str, fn: Callable | None = None) -> Any:
+    def get(self, key: str, fn: Optional[Callable] = None) -> Union[str, bytes, int, float, None]:  # noqa: E501
         '''
         Retieves data from Redis and applies optional conversion function.
         key: retieves ke while fn is the an optional
